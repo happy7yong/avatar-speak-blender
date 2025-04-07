@@ -2,7 +2,7 @@
 import React from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import { Avatar } from './Avatar'
+import { Avatar } from './components/Avatar'
 
 function App() {
   return (
