@@ -42,8 +42,11 @@ function App() {
         const flatTimeline = wordTimeline.flat()
         setTimeline(flatTimeline)
 
-        // TTS 음성 발음 및 입모양 동기화
+        // 입모양 타이밍 동기화
         playLipSyncTimeline(flatTimeline)
+
+        // TTS 음성 발음
+        fetchTTS(inputText)  // 여기서 직접 호출
     }
 
     // 입모양 타이밍 동기화
@@ -77,6 +80,35 @@ function App() {
     // 발화 길이 예측 함수 (초 단위)
     function estimateTTSLength(text) {
         return text.length * 0.15
+    }
+
+    // TTS 발음 처리
+    async function fetchTTS(text) {
+        const API_KEY = 'AIzaSyC5MCrRINOvp2nmDN7mDLOr_woIZMASqFM'
+        const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${API_KEY}`
+
+        const body = JSON.stringify({
+            input: { text: text },
+            voice: { languageCode: 'ko-KR', name: 'ko-KR-Wavenet-A' },
+            audioConfig: { audioEncoding: 'MP3' },
+        })
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: body,
+        })
+
+        const data = await response.json()
+
+        if (data.error) {
+            console.error('TTS API 에러:', data.error)
+            return
+        }
+
+        const audioContent = data.audioContent
+        const audio = new Audio('data:audio/mp3;base64,' + audioContent)
+        audio.play()
     }
 
     return (

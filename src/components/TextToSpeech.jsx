@@ -32,16 +32,8 @@ function TextToSpeech({ text, onEnd, handleClick }) {
         audio.onended = onEnd  // TTS가 끝났을 때 콜백
     }
 
-    function handleClickWrapper() {
-        if (text) {
-            fetchTTS(text)
-        }
-    }
 
-    return <div>
-        {/* 버튼 클릭 시 fetchTTS 호출 */}
-        <button onClick={handleClickWrapper}>TTS 발음</button>
-    </div>
+    return null
 }
 
 export default TextToSpeech
