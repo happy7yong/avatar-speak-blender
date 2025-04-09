@@ -9,11 +9,24 @@ import Hangul from 'hangul-js'
 
 function App() {
     const [text, setText] = useState('')
+    const [currentPhoneme, setCurrentPhoneme] = useState('SLIENCE')
     const [timeline, setTimeline] = useState([])
 
-    // TTS가 끝났을 때 입모양 애니메이션 타이밍 생성
-    function handleEndOfSpeech() {
-        const words = text.trim().split(' ')
+    // 말하기 버튼을 눌렀을 때 실행
+    function handleSpeak() {
+        if (!text.trim()) {
+            console.log('텍스트가 비어있습니다. 입력 후 버튼을 클릭해주세요.')
+            return
+        }
+
+        // TTS 음성 발음 및 입모양 동기화
+        handleTextToSpeech(text)
+    }
+
+    // 텍스트를 받아 TTS 발음과 입모양 타이밍을 처리
+    function handleTextToSpeech(inputText) {
+        // 텍스트 기반으로 입모양 타이밍 계산
+        const words = inputText.trim().split(' ')
 
         const wordTimeline = words.map((word) => {
             const jamos = splitHangulToJamo(word)
@@ -26,7 +39,24 @@ function App() {
             }))
         })
 
-        setTimeline(wordTimeline.flat()) // flat()으로 한 단어 단위로 펼침
+        const flatTimeline = wordTimeline.flat()
+        setTimeline(flatTimeline)
+
+        // TTS 음성 발음 및 입모양 동기화
+        playLipSyncTimeline(flatTimeline)
+    }
+
+    // 입모양 타이밍 동기화
+    function playLipSyncTimeline(timeline) {
+        timeline.forEach(({ phoneme, start, end }) => {
+            setTimeout(() => {
+                setCurrentPhoneme(phoneme)
+            }, start * 1000)
+
+            setTimeout(() => {
+                setCurrentPhoneme('SLIENCE')
+            }, end * 1000)
+        })
     }
 
     // 한글 자모 → 입모양 이름 매핑
@@ -59,19 +89,18 @@ function App() {
                     onChange={(e) => setText(e.target.value)}
                     style={{ marginRight: '8px', padding: '4px' }}
                 />
-                <button onClick={() => handleEndOfSpeech()}>🗣️ 말하기</button>
+                <button onClick={handleSpeak}>🗣️ 말하기</button>
             </div>
 
-            <TextToSpeech text={text} onEnd={handleEndOfSpeech} />
-
+            {/* TextToSpeech와 LipSync 컴포넌트 */}
+            <TextToSpeech text={text} onEnd={() => console.log('TTS 완료')} />
             <Canvas camera={{ position: [0, 1.5, 3] }}>
                 <ambientLight intensity={0.5} />
                 <directionalLight position={[2, 2, 2]} />
                 <OrbitControls />
-                <Avatar currentPhoneme={timeline[timeline.length - 1]?.phoneme || 'SLIENCE'} />
+                <Avatar currentPhoneme={currentPhoneme} />
             </Canvas>
 
-            {/* 입모양 애니메이션을 별도 컴포넌트로 분리 */}
             <LipSync timeline={timeline} />
         </>
     )
