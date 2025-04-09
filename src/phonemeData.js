@@ -4,5 +4,5 @@ export const phonemeTimeline = [
     { phoneme: 'AA', start: 0.35, end: 0.50 }, // lo
     { phoneme: 'FV', start: 0.50, end: 0.60 }, // v
     { phoneme: 'EE', start: 0.60, end: 0.70 }, // y
-    { phoneme: 'OO', start: 0.70, end: 0.90 }, // you
+    { phoneme: 'OO', start: 0.70, end: 0.90 },
 ]
