@@ -1,60 +1,32 @@
+// src/App.jsx
 import React, { useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import Avatar from './components/Avatar'
+import TextToSpeech from './components/TextToSpeech'
+import LipSync from './components/LipSync'
 import Hangul from 'hangul-js'
 
 function App() {
     const [text, setText] = useState('')
-    const [currentPhoneme, setCurrentPhoneme] = useState('SLIENCE')
+    const [timeline, setTimeline] = useState([])
 
-    // 사용자가 말하기 버튼을 눌렀을 때 실행
-    function handleSpeakSentence(fullText) {
-        const words = fullText.trim().split(' ')
-        let totalDelay = 0
+    // TTS가 끝났을 때 입모양 애니메이션 타이밍 생성
+    function handleEndOfSpeech() {
+        const words = text.trim().split(' ')
 
-        words.forEach((word, index) => {
-            const delay = totalDelay * 1000
+        const wordTimeline = words.map((word) => {
+            const jamos = splitHangulToJamo(word)
+            const durationPerJamo = estimateTTSLength(word) / jamos.length
 
-            setTimeout(() => {
-                speakWord(word)
-            }, delay)
-
-            const estimatedDuration = estimateTTSLength(word)
-            totalDelay += estimatedDuration + 0.3 // 단어 끝나고 0.3초 쉬기
-        })
-    }
-
-    // 단어 하나를 TTS + 입모양 처리
-    function speakWord(word) {
-        const utter = new SpeechSynthesisUtterance(word)
-        utter.lang = 'ko-KR'
-        speechSynthesis.speak(utter)
-
-        const jamos = splitHangulToJamo(word)
-        const durationPerJamo = estimateTTSLength(word) / jamos.length
-
-        const timeline = jamos.map((j, i) => ({
-            phoneme: mapKoreanToShape(j),
-            start: i * durationPerJamo,
-            end: (i + 1) * durationPerJamo,
-        }))
-
-        playLipSyncTimeline(timeline)
-    }
-
-    // 입모양 애니메이션 재생
-    function playLipSyncTimeline(timeline) {
-        timeline.forEach(({ phoneme, start }) => {
-            setTimeout(() => {
-                setCurrentPhoneme(phoneme)
-            }, start * 1000)
+            return jamos.map((j, i) => ({
+                phoneme: mapKoreanToShape(j),
+                start: i * durationPerJamo,
+                end: (i + 1) * durationPerJamo,
+            }))
         })
 
-        const last = timeline[timeline.length - 1]
-        setTimeout(() => {
-            setCurrentPhoneme('SLIENCE')
-        }, last.end * 1000)
+        setTimeline(wordTimeline.flat()) // flat()으로 한 단어 단위로 펼침
     }
 
     // 한글 자모 → 입모양 이름 매핑
@@ -87,15 +59,20 @@ function App() {
                     onChange={(e) => setText(e.target.value)}
                     style={{ marginRight: '8px', padding: '4px' }}
                 />
-                <button onClick={() => handleSpeakSentence(text)}>🗣️ 말하기</button>
+                <button onClick={() => handleEndOfSpeech()}>🗣️ 말하기</button>
             </div>
+
+            <TextToSpeech text={text} onEnd={handleEndOfSpeech} />
 
             <Canvas camera={{ position: [0, 1.5, 3] }}>
                 <ambientLight intensity={0.5} />
                 <directionalLight position={[2, 2, 2]} />
                 <OrbitControls />
-                <Avatar currentPhoneme={currentPhoneme} />
+                <Avatar currentPhoneme={timeline[timeline.length - 1]?.phoneme || 'SLIENCE'} />
             </Canvas>
+
+            {/* 입모양 애니메이션을 별도 컴포넌트로 분리 */}
+            <LipSync timeline={timeline} />
         </>
     )
 }
