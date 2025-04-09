@@ -11,10 +11,10 @@ export default function Avatar({ currentPhoneme }) {
         OO: 1,
         EE: 2,
         FV: 3,
+        SLIENCE: 4,
         silence: 4,
     }
 
-    // 보간을 위해 target 값 저장
     const [targetInfluences, setTargetInfluences] = useState([0, 0, 0, 0, 0])
 
     useEffect(() => {
@@ -26,13 +26,17 @@ export default function Avatar({ currentPhoneme }) {
         setTargetInfluences(newTargets)
     }, [currentPhoneme])
 
+    useEffect(() => {
+        if (!meshRef.current) return
+        console.log('📦 morphTargetDictionary:', meshRef.current.morphTargetDictionary)
+    })
+
+
     useFrame(() => {
         if (!meshRef.current || !meshRef.current.morphTargetInfluences) return
         const influences = meshRef.current.morphTargetInfluences
-
-        // 매 프레임마다 천천히 다가가게 (lerp)
         for (let i = 0; i < influences.length; i++) {
-            influences[i] += (targetInfluences[i] - influences[i]) * 0.2 // ← 부드러움 정도 조절
+            influences[i] += (targetInfluences[i] - influences[i]) * 0.2
         }
     })
 
