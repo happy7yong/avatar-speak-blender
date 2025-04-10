@@ -5,7 +5,6 @@ import { OrbitControls } from '@react-three/drei'
 import Avatar from './components/Avatar'
 import LipSync from './components/LipSync'
 import { handleTextToSpeech } from './utils/TextToSpeechUtils'
-import Hangul from "hangul-js";
 
 function App() {
     const [text, setText] = useState('')

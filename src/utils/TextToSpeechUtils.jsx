@@ -22,7 +22,7 @@ export function handleTextToSpeech(inputText, setCurrentPhoneme, setTimeline) {
     setTimeline(flatTimeline)
 
     playLipSyncTimeline(flatTimeline, setCurrentPhoneme)
-    fetchTTS(inputText)
+    fetchTTS(inputText, true) //TTS speeking
 }
 
 function splitHangulToJamo(text) {
