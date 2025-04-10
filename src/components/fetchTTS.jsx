@@ -1,4 +1,4 @@
-// src/components/TextToSpeech.jsx
+// src/components/fetchTTS.jsx
 import React from 'react'
 
 // TTS 발음 처리
@@ -28,6 +28,8 @@ async function fetchTTS(text) {
     const audioContent = data.audioContent
     const audio = new Audio('data:audio/mp3;base64,' + audioContent)
     audio.play()
+
+
 }
 
 export default fetchTTS
