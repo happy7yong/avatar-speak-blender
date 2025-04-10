@@ -5,7 +5,7 @@ import { OrbitControls } from '@react-three/drei'
 import Avatar from './components/Avatar'
 import LipSync from './components/LipSync'
 import { handleTextToSpeech } from './utils/TextToSpeechUtils'
-import Hangul from "hangul-js";
+import TestLipSyncButton from "./components/TestLipSyncButton";
 
 function App() {
     const [text, setText] = useState('')
@@ -36,14 +36,20 @@ function App() {
                 <button onClick={handleSpeak}>🗣️ 말하기</button>
             </div>
 
+
             <Canvas camera={{ position: [0, 1.5, 3] }}>
                 <ambientLight intensity={0.5} />
                 <directionalLight position={[2, 2, 2]} />
                 <OrbitControls />
                 <Avatar currentPhoneme={currentPhoneme} />
             </Canvas>
+            <TestLipSyncButton
+                setCurrentPhoneme={setCurrentPhoneme}
+                setTimeline={setTimeline}
+            />
 
             <LipSync timeline={timeline} />
+
         </>
     )
 }
