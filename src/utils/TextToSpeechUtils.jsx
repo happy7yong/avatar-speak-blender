@@ -13,24 +13,32 @@ export function handleTextToSpeech(inputText, setCurrentPhoneme, setTimeline) {
         .then(res => res.json())
         .then((segments) => {
             const flatTimeline = []
+            const CORRECTION = 0.05
 
             segments.forEach(({ text, start, end }) => {
+                const adjustedStart = Math.max(0, start - CORRECTION)
+                const adjustedEnd = end
+                const duration = adjustedEnd - adjustedStart
+
                 const jamos = splitHangulToJamo(text)
-                const duration = end - start
                 const perJamo = duration / jamos.length
 
                 jamos.forEach((jamo, i) => {
                     const phoneme = mapKoreanToShape(jamo)
                     flatTimeline.push({
                         phoneme,
-                        start: +(start + i * perJamo).toFixed(2),
-                        end: +(start + (i + 1) * perJamo).toFixed(2)
+                        start: +(adjustedStart + i * perJamo).toFixed(2),
+                        end: +(adjustedStart + (i + 1) * perJamo).toFixed(2)
                     })
                 })
             })
 
             setTimeline(flatTimeline)
-            playLipSyncTimeline(flatTimeline, setCurrentPhoneme)
+
+            const audio = new Audio('/tts_output.mp3')
+            const startTime = Date.now()
+            audio.play()
+            playLipSyncTimeline(flatTimeline, setCurrentPhoneme, startTime)
         })
         .catch((err) => {
             console.error('Whisper 타이밍 데이터를 불러오지 못했습니다:', err)
@@ -41,16 +49,16 @@ export function handleTextToSpeech(inputText, setCurrentPhoneme, setTimeline) {
 function splitHangulToJamo(text) {
     return text.split('').flatMap(char => Hangul.disassemble(char)).filter(j => j.trim() !== '')
 }
-
+const GLOBAL_OFFSET = 0.05
 // 타이밍 기반 입모양 애니메이션 실행
-function playLipSyncTimeline(timeline, setCurrentPhoneme) {
+function playLipSyncTimeline(timeline, setCurrentPhoneme, startTime) {
     timeline.forEach(({ phoneme, start, end }) => {
         setTimeout(() => {
             setCurrentPhoneme(phoneme)
-        }, start * 1000)
+        }, (start - GLOBAL_OFFSET) * 1000)
 
         setTimeout(() => {
             setCurrentPhoneme('SLIENCE')
-        }, end * 1000)
+        }, (end - GLOBAL_OFFSET) * 1000)
     })
 }
