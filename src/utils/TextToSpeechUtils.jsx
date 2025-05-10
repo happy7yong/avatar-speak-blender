@@ -1,4 +1,3 @@
-// utils/textToSpeechUtils.js
 import mapKoreanToShape from '../components/mapKoreanToShape'
 import fetchTTS from '../components/fetchTTS'
 import Hangul from 'hangul-js'

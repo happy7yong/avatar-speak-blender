@@ -8,7 +8,7 @@ async function fetchTTS(text, saveFile = false) {
 
     const body = JSON.stringify({
         input: { text: text },
-        voice: { languageCode: 'ko-KR', name: 'ko-KR-Wavenet-A' },
+        voice: { languageCode: 'ko-KR', name: 'ko-KR-Standard-D' },
         audioConfig: { audioEncoding: 'MP3' },
     })
 
